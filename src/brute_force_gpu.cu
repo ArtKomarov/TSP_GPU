@@ -9,8 +9,6 @@
 #include "brute_force.h"
 #include "tsp.h"
 
-#define __global__ void
-
 __global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *currentPath, dist_t *optimPathLen, size_t pathSize, size_t iterationsNumber, int lastTownNumber)
 {
     // TODO: use shared memory
