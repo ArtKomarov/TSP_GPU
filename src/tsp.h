@@ -23,6 +23,7 @@ class TSP : public OptimProblem
 public:
     TSP(size_t townsNumber);
 
+    void assignDists(const dist_t *dists);
     void readDists(const char *filename);
     void readDists(std::istream &in = std::cin);
     void printDists(size_t indent = 3) const;

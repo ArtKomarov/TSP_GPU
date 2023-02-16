@@ -12,9 +12,19 @@ TSP::TSP(size_t townsNumber) : townsNumber(townsNumber),
                                dists(nullptr),
                                startTown(0) {}
 
+void TSP::assignDists(const dist_t *dists)
+{
+    this->dists = new dist_t[townsNumber * townsNumber];
+
+    for (size_t i = 0; i < townsNumber * townsNumber; ++i)
+    {
+        this->dists[i] = dists[i];
+    }
+}
+
 void TSP::readDists(std::istream &in)
 {
-    dists = new int[townsNumber * townsNumber];
+    dists = new dist_t[townsNumber * townsNumber];
 
     for (size_t i = 0; i < townsNumber * townsNumber; ++i)
     {

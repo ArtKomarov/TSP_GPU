@@ -5,12 +5,17 @@
 
 int main()
 {
-    std::cout << "Print 3x3 matrix:" << std::endl;
     TSP tsp(3);
-    tsp.readDists();
+    dist_t *distances = new dist_t[9];
+    for (int i = 0; i < 9; ++i)
+    {
+        distances[i] = i + 1;
+    }
+
+    tsp.assignDists(distances);
     tsp.printDists();
 
-    BruteForce::solveTSP(tsp);
+    BruteForce::solveTSPGPU(tsp, 3);
 
     std::cout << "Travelling salesman path len: " << tsp.getOptimPathLength() << "\nHis path:\n 0 -> ";
     for (size_t i = 0; i < tsp.getTownsNumber() - 1; ++i)

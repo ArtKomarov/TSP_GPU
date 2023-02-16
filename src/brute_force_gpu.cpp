@@ -1,6 +1,10 @@
 #include <vector>
 #include <stack>
 #include <cmath>
+#include <cassert>
+#include <algorithm>
+
+#include <cuda_runtime.h>
 
 #include "brute_force.h"
 #include "tsp.h"
@@ -12,7 +16,7 @@ __global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *currentPat
     // TODO: use shared memory
 
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int threadsNumber = bockDim.x * gridDim.x;
+    int threadsNumber = blockDim.x * gridDim.x;
     size_t iters = iterationsNumber / threadsNumber;
     size_t startIter = idx * iters;
     if (idx == threadsNumber - 1)
@@ -68,7 +72,11 @@ __global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *currentPat
             if (optimPathLen[idx] == 0 || optimPathLen[idx] > currentPathLen)
             {
                 optimPathLen[idx] = currentPathLen;
-                std::copy(currentPath + idx * pathSize, currentPath + idx * pathSize + pathSize, optimPath + idx * pathSize);
+                // std::copy(currentPath + idx * pathSize, currentPath + idx * pathSize + pathSize, optimPath + idx * pathSize);
+                for (size_t k = 0; k < pathSize; ++k)
+                {
+                    (optimPath + idx * pathSize)[i] = (currentPath + idx * pathSize)[i];
+                }
             }
         }
 
@@ -116,12 +124,12 @@ namespace BruteForce
 
         cudaMemcpy(h_optimPathLen, d_optimPathLen, pathSize * sizeof(dist_t), cudaMemcpyDeviceToHost);
 
-        dist_t *argMinOptimPathLenIter = std::min_element(d_optimPathLen, d_optimPathLen + pathSize);
+        dist_t *argMinOptimPathLenIter = std::min_element(h_optimPathLen, h_optimPathLen + pathSize);
         size_t argMinOptimPathLen = argMinOptimPathLenIter - h_optimPathLen;
         assert(argMinOptimPathLen < pathSize);
         dist_t optimPathLen = h_optimPathLen[argMinOptimPathLen];
 
-        cudaMemcpy(optimPath, pathSize * sizeof(int), d_optimPath + argMinOptimPathLen * pathSize * sizeof(int), cudaMemcpyDeviceToHost);
+        cudaMemcpy(optimPath, d_optimPath + argMinOptimPathLen * pathSize, pathSize * sizeof(int), cudaMemcpyDeviceToHost);
 
         tsp.setSolution(optimPath, optimPathLen);
     }
