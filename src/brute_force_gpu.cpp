@@ -106,7 +106,7 @@ namespace BruteForce
         // we will place towns with numbers [1-lastTownNumber] on pathSize places
         size_t iterationsNumber = std::pow(townsNumber - 1, pathSize) - 1;
 
-        dist_t *h_optimPathLen = new dist_t[pathSize]; // we will copy path lengths from all threads here
+        dist_t *h_optimPathLen = new dist_t[threadsNumber]; // we will copy path lengths from all threads here
         int *optimPath = new int[pathSize];
 
         dist_t *d_optimPathLen;
@@ -122,11 +122,11 @@ namespace BruteForce
 
         solveTSPGPUKernel<<<1, threadsNumber>>>(d_dists, d_optimPath, d_currentPath, d_optimPathLen, pathSize, iterationsNumber, lastTownNumber);
 
-        cudaMemcpy(h_optimPathLen, d_optimPathLen, pathSize * sizeof(dist_t), cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_optimPathLen, d_optimPathLen, threadsNumber * sizeof(dist_t), cudaMemcpyDeviceToHost);
 
-        dist_t *argMinOptimPathLenIter = std::min_element(h_optimPathLen, h_optimPathLen + pathSize);
+        dist_t *argMinOptimPathLenIter = std::min_element(h_optimPathLen, h_optimPathLen + threadsNumber);
         size_t argMinOptimPathLen = argMinOptimPathLenIter - h_optimPathLen;
-        assert(argMinOptimPathLen < pathSize);
+        assert(argMinOptimPathLen < threadsNumber);
         dist_t optimPathLen = h_optimPathLen[argMinOptimPathLen];
 
         cudaMemcpy(optimPath, d_optimPath + argMinOptimPathLen * pathSize, pathSize * sizeof(int), cudaMemcpyDeviceToHost);
