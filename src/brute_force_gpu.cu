@@ -3,7 +3,6 @@
 #include <cmath>
 #include <cassert>
 #include <algorithm>
-#include <limits>
 
 #include <cuda_runtime.h>
 
@@ -35,7 +34,7 @@ __global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *currentPat
         currentIter = currentIter / townsNumberToIterate;
     }
 
-    optimPathLen[idx] = std::numerical_limits<dist_t>::max();
+    optimPathLen[idx] = 123456;
 
     for (size_t i = 0; i < iters; ++i)
     {
