@@ -26,8 +26,13 @@ namespace BruteForce
         int lastTownNumber = static_cast<int>(tsp.getTownsNumber() - 1);
         size_t depth = std::pow(tsp.getTownsNumber() - 1, pathSize) - 1;
 
+        std::cout << "depth: " << depth << std::endl;
         for (size_t i = 0; i < depth; ++i)
         {
+            if (i % 100000000 == 0)
+            {
+                std::cout << "i: " << i << std::endl;
+            }
             // Check current path
             bool skip = false;
             for (size_t j1 = 0; j1 < pathSize; ++j1)
@@ -45,12 +50,13 @@ namespace BruteForce
             }
             if (!skip)
             {
-                std::cout << "currentPath check:" << std::endl;
+                std::cout << "currentPath check:          ";
                 for (size_t i = 0; i < pathSize; ++i)
                 {
                     std::cout << currentPath[i] << " " << std::flush;
                 }
-                // Compute current path
+                std::cout << std::endl;
+                //  Compute current path
                 int previousTown = 0;
                 dist_t currentPathLen = 0;
 
@@ -65,7 +71,7 @@ namespace BruteForce
                 if (optimPathLen == 0 || optimPathLen > currentPathLen)
                 {
                     optimPathLen = currentPathLen;
-                    std::copy(currentPath, currentPath + tsp.getTownsNumber(), optimPath);
+                    std::copy(currentPath, currentPath + pathSize, optimPath);
                 }
             }
 

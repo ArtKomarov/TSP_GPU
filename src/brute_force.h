@@ -6,7 +6,9 @@
 namespace BruteForce
 {
     void solveTSP(TSP &tsp);
+#ifdef GPU_COMPUTING
     void solveTSPGPU(TSP &tsp, size_t threadsNumber);
+#endif
 };
 
 #endif // BRUTE_FORCE_H

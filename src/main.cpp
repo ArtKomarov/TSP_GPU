@@ -5,17 +5,15 @@
 
 int main()
 {
-    TSP tsp(3);
-    dist_t *distances = new dist_t[9];
-    for (int i = 0; i < 9; ++i)
-    {
-        distances[i] = i + 1;
-    }
+    TSP tsp(5);
+    tsp.readDists("../data/dists_5_towns.txt");
+    tsp.printDists(5);
 
-    tsp.assignDists(distances);
-    tsp.printDists();
-
+#ifdef GPU_COMPUTING
     BruteForce::solveTSPGPU(tsp, 3);
+#else
+    BruteForce::solveTSP(tsp);
+#endif
 
     std::cout << "Travelling salesman path len: " << tsp.getOptimPathLength() << "\nHis path:\n 0 -> ";
     for (size_t i = 0; i < tsp.getTownsNumber() - 1; ++i)

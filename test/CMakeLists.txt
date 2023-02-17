@@ -18,11 +18,15 @@ set(GTEST_LIBRARY ~/local/lib/)
 set(GTEST_MAIN_LIBRARY ~/local/lib/)
 find_package(GTest REQUIRED)
 
+set(SOURCE_DIR "../src")
+
 add_executable(
   tsp_test
   temp_test.cpp
   tsp_test.cpp
-  ../src/tsp.cpp
+  brute_force_test.cpp
+  ${SOURCE_DIR}/tsp.cpp
+  ${SOURCE_DIR}/brute_force.cpp
 )
 target_link_libraries(
   tsp_test
