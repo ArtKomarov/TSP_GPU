@@ -88,7 +88,7 @@ __global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *currentPat
         while (currentPath[idx * pathSize + lastNonLastIndex] == lastTownNumber)
         {
             currentPath[idx * pathSize + lastNonLastIndex] = 1;
-            assert(lastNonLastIndex > 0);
+            assert(lastNonLastIndex > 0 || (idx == threadsNumber - 1 && i == iters));
             lastNonLastIndex--;
         }
 
@@ -138,7 +138,12 @@ namespace BruteForce
 
         int *optimPath = new int[pathSize];
         cudaMemcpy(optimPath, d_optimPath + argMinOptimPathLen * pathSize, pathSize * sizeof(int), cudaMemcpyDeviceToHost);
-        std::cout << "Optim path before set: Len: " << optimPathLen << " path [1] = " << optimPath[1] << std::endl;
+        std::cout << "Optim path before set: " << optimPathLen << std::endl;
+        for (int i = 0; i < pathSize; ++i)
+        {
+            std::cout << optimPath[i] << " ";
+        }
+        std::cout << std::endl;
 
         tsp.setSolution(optimPath, optimPathLen);
     }
