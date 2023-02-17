@@ -75,7 +75,7 @@ __global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *currentPat
                 // std::copy(currentPath + idx * pathSize, currentPath + idx * pathSize + pathSize, optimPath + idx * pathSize);
                 for (size_t k = 0; k < pathSize; ++k)
                 {
-                    (optimPath + idx * pathSize)[i] = (currentPath + idx * pathSize)[i];
+                    (optimPath + idx * pathSize)[k] = (currentPath + idx * pathSize)[k];
                 }
             }
         }
@@ -87,7 +87,7 @@ __global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *currentPat
         while (currentPath[idx * pathSize + lastNonLastIndex] == lastTownNumber)
         {
             currentPath[idx * pathSize + lastNonLastIndex] = 1;
-            assert(lastNonLastIndex > 0 || (idx == threadsNumber - 1 && i == iters));
+            assert(lastNonLastIndex > 0 || (idx == threadsNumber - 1 && i == iters - 1));
             lastNonLastIndex--;
         }
 
