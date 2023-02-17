@@ -106,9 +106,9 @@ int *TSP::getOptimPathSteps() const
 
 void TSP::setSolution(const int *optimPathSteps, dist_t optimPathLength)
 {
-    this->optimPathSteps = new int[this->getTownsNumber()];
+    this->optimPathSteps = new int[this->getTownsNumber() - 1];
 
-    for (size_t i = 0; i < getTownsNumber(); ++i)
+    for (size_t i = 0; i < getTownsNumber() - 1; ++i)
     {
         this->optimPathSteps[i] = optimPathSteps[i];
     }

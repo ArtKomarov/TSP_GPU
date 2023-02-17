@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cassert>
 #include <algorithm>
+#include <limits>
 
 #include <cuda_runtime.h>
 
@@ -26,13 +27,15 @@ __global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *currentPat
     size_t townsNumberToIterate = static_cast<size_t>(lastTownNumber);
     size_t currentIter = startIter;
 
-    for (long i = pathSize; i >= 0; --i)
+    for (long i = pathSize - 1; i >= 0; --i)
     {
         // On the (currentIter == 1) current path should be 1 1 ... 1 2
         // On the (currentIter == townsNumberToIterate) it should be check of 1 1 ... 1 2 1
         currentPath[idx * pathSize + i] = static_cast<int>(currentIter % townsNumberToIterate + 1);
         currentIter = currentIter / townsNumberToIterate;
     }
+
+    optimPathLen[idx] = std::numerical_limits<dist_t>::max();
 
     for (size_t i = 0; i < iters; ++i)
     {
@@ -102,10 +105,8 @@ namespace BruteForce
         int lastTownNumber = static_cast<int>(townsNumber - 1);
 
         // we will place towns with numbers [1-lastTownNumber] on pathSize places
-        size_t iterationsNumber = std::pow(townsNumber - 1, pathSize) - 1;
-
-        dist_t *h_optimPathLen = new dist_t[threadsNumber]; // we will copy path lengths from all threads here
-        int *optimPath = new int[pathSize];
+        size_t iterationsNumber = std::pow(townsNumber - 1, pathSize);
+        std::cout << "Consts: " << townsNumber << " " << pathSize << " " << lastTownNumber << " " << iterationsNumber << " " << std::endl;
 
         dist_t *d_optimPathLen;
         int *d_optimPath;
@@ -117,17 +118,27 @@ namespace BruteForce
         cudaMalloc((void **)&d_dists, townsNumber * townsNumber * sizeof(int));
 
         cudaMemcpy(d_dists, tsp.getDists(), townsNumber * townsNumber * sizeof(dist_t), cudaMemcpyHostToDevice);
+        std::cout << "tsp.getDists()[2]: " << tsp.getDists()[2] << std::endl;
 
         solveTSPGPUKernel<<<1, threadsNumber>>>(d_dists, d_optimPath, d_currentPath, d_optimPathLen, pathSize, iterationsNumber, lastTownNumber);
 
+        dist_t *h_optimPathLen = new dist_t[threadsNumber];
         cudaMemcpy(h_optimPathLen, d_optimPathLen, threadsNumber * sizeof(dist_t), cudaMemcpyDeviceToHost);
+        std::cout << "h_optimPathLen: " << std::endl;
+        for (int i = 0; i < threadsNumber; ++i)
+        {
+            std::cout << h_optimPathLen[i] << " ";
+        }
+        std::cout << std::endl;
 
         dist_t *argMinOptimPathLenIter = std::min_element(h_optimPathLen, h_optimPathLen + threadsNumber);
         size_t argMinOptimPathLen = argMinOptimPathLenIter - h_optimPathLen;
         assert(argMinOptimPathLen < threadsNumber);
         dist_t optimPathLen = h_optimPathLen[argMinOptimPathLen];
 
+        int *optimPath = new int[pathSize];
         cudaMemcpy(optimPath, d_optimPath + argMinOptimPathLen * pathSize, pathSize * sizeof(int), cudaMemcpyDeviceToHost);
+        std::cout << "Optim path before set: Len: " << optimPathLen << " path [1] = " << optimPath[1] << std::endl;
 
         tsp.setSolution(optimPath, optimPathLen);
     }
