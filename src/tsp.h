@@ -8,6 +8,15 @@
 extern const char *DATA_PATH;
 typedef int dist_t;
 
+struct TSPSolution
+{
+    dist_t optimPathLength;
+    int *optimPathSteps;
+    float solutionTime;
+
+    TSPSolution();
+};
+
 class TSP : public OptimProblem
 {
     /// @brief Distances matrix between towns
@@ -17,8 +26,7 @@ class TSP : public OptimProblem
     /// @brief Salesman starting town
     int startTown;
 
-    dist_t optimPathLength;
-    int *optimPathSteps;
+    TSPSolution *solution;
 
 public:
     TSP(size_t townsNumber);
@@ -38,9 +46,11 @@ public:
     size_t getStartTown() const;
 
     dist_t getOptimPathLength() const;
-    int *getOptimPathSteps() const;
+    const int *getOptimPathSteps() const;
+    float getSolutionTime() const;
 
-    void setSolution(const int *optimPathSteps, dist_t optimPathLength);
+    void setSolution(const TSPSolution &tspSolution);
+    void setSolution(dist_t optimPathLength, const int *optimPathSteps, float solutionTime);
 };
 
 #endif // TSP_H

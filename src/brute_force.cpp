@@ -3,6 +3,7 @@
 #include <vector>
 #include <stack>
 #include <cmath>
+#include <chrono>
 
 void solveTSPGPUKernel(dist_t *dists)
 {
@@ -16,6 +17,9 @@ namespace BruteForce
         size_t pathSize = tsp.getTownsNumber() - 1; // not include last move to the start town
         int *optimPath = new int[pathSize];
         int *currentPath = new int[pathSize];
+
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
         for (size_t i = 0; i < pathSize; ++i)
         {
             currentPath[i] = 1;
@@ -26,13 +30,8 @@ namespace BruteForce
         int lastTownNumber = static_cast<int>(tsp.getTownsNumber() - 1);
         size_t depth = std::pow(tsp.getTownsNumber() - 1, pathSize) - 1;
 
-        std::cout << "depth: " << depth << std::endl;
         for (size_t i = 0; i < depth; ++i)
         {
-            if (i % 100000000 == 0)
-            {
-                std::cout << "i: " << i << std::endl;
-            }
             // Check current path
             bool skip = false;
             for (size_t j1 = 0; j1 < pathSize; ++j1)
@@ -50,12 +49,6 @@ namespace BruteForce
             }
             if (!skip)
             {
-                std::cout << "currentPath check:          ";
-                for (size_t i = 0; i < pathSize; ++i)
-                {
-                    std::cout << currentPath[i] << " " << std::flush;
-                }
-                std::cout << std::endl;
                 //  Compute current path
                 int previousTown = 0;
                 dist_t currentPathLen = 0;
@@ -86,14 +79,11 @@ namespace BruteForce
             currentPath[lastNonLastIndex]++;
         }
 
-        std::cout << "currentPath:" << std::endl;
-        for (size_t i = 0; i < pathSize; ++i)
-        {
-            std::cout << currentPath[i] << " " << std::flush;
-            // assert(currentPath[i] == static_cast<int>(lastTownNumber));
-        }
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
-        tsp.setSolution(optimPath, optimPathLen);
+        long long durationMcs = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+        tsp.setSolution(optimPathLen, optimPath, static_cast<double>(durationMcs) / 1000000.0);
 
         delete[] optimPath;
         delete[] currentPath;

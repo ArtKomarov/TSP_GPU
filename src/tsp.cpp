@@ -8,6 +8,12 @@
 // const char *PROJECT_PATH = "~/Main/Artem/TSP/";
 // const char *DATA_PATH = (std::string(PROJECT_PATH) + "data/").c_str();
 
+TSPSolution::TSPSolution() : optimPathLength(0),
+                             optimPathSteps(nullptr),
+                             solutionTime(0)
+{
+}
+
 TSP::TSP(size_t townsNumber) : townsNumber(townsNumber),
                                dists(nullptr),
                                startTown(0) {}
@@ -96,22 +102,33 @@ size_t TSP::getStartTown() const
 
 dist_t TSP::getOptimPathLength() const
 {
-    return optimPathLength;
+    return solution->optimPathLength;
 }
 
-int *TSP::getOptimPathSteps() const
+const int *TSP::getOptimPathSteps() const
 {
-    return optimPathSteps;
+    return solution->optimPathSteps;
 }
 
-void TSP::setSolution(const int *optimPathSteps, dist_t optimPathLength)
+float TSP::getSolutionTime() const
 {
-    this->optimPathSteps = new int[this->getTownsNumber() - 1];
+    return solution->solutionTime;
+}
+
+void TSP::setSolution(dist_t optimPathLength, const int *optimPathSteps, float solutionTime)
+{
+    solution = new TSPSolution();
+    solution->optimPathSteps = new int[this->getTownsNumber() - 1];
 
     for (size_t i = 0; i < getTownsNumber() - 1; ++i)
     {
-        this->optimPathSteps[i] = optimPathSteps[i];
+        solution->optimPathSteps[i] = optimPathSteps[i];
     }
 
-    this->optimPathLength = optimPathLength;
+    solution->optimPathLength = optimPathLength;
+}
+
+void TSP::setSolution(const TSPSolution &tspSolution)
+{
+    setSolution(tspSolution.optimPathLength, tspSolution.optimPathSteps, tspSolution.solutionTime);
 }

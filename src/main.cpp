@@ -5,8 +5,8 @@
 
 int main()
 {
-    TSP tsp(5);
-    tsp.readDists("../data/dists_5_towns.txt");
+    TSP tsp(11);
+    tsp.readDists("../data/dists_11_towns.txt");
     tsp.printDists(5);
 
 #ifdef GPU_COMPUTING
@@ -21,6 +21,7 @@ int main()
         std::cout << tsp.getOptimPathSteps()[i] << " -> ";
     }
     std::cout << "0" << std::endl;
+    std::cout << "Solution takes " << tsp.getSolutionTime() << "s" << std::endl;
 
     return 0;
 }

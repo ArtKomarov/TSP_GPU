@@ -4,12 +4,14 @@ project(tsp_gpu)
 
 find_package(CUDA REQUIRED)
 
+set(SOURCE_DIR "../src")
+
 set(CPP_SRC_FILES
-    src/main.cpp
-    src/brute_force.cpp
-    src/brute_force.h
-    src/tsp.cpp
-    src/tsp.h
+    ${SOURCE_DIR}/main.cpp
+    ${SOURCE_DIR}/brute_force.cpp
+    ${SOURCE_DIR}/brute_force.h
+    ${SOURCE_DIR}/tsp.cpp
+    ${SOURCE_DIR}/tsp.h
 )
 
 set(CUDA_SRC_FILES
