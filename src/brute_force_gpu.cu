@@ -121,13 +121,13 @@ namespace BruteForce
 
         cudaEvent_t start, stop;
         float elapsedTime;
-
         cudaEventCreate(&start);
-        cudaEventRecord(start, 0);
+        cudaEventCreate(&stop);
+
+        cudaEventRecord(start);
         solveTSPGPUKernel<<<1, threadsNumber>>>(d_dists, d_optimPath, d_currentPath, d_optimPathLen, pathSize, iterationsNumber, lastTownNumber);
 
-        cudaEventCreate(&stop);
-        cudaEventRecord(stop, 0);
+        cudaEventRecord(stop);
         cudaEventSynchronize(stop);
         cudaEventElapsedTime(&elapsedTime, start, stop);
 

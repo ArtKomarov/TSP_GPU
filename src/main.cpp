@@ -10,7 +10,7 @@ int main()
     tsp.printDists(5);
 
 #ifdef GPU_COMPUTING
-    BruteForce::solveTSPGPU(tsp, 3);
+    BruteForce::solveTSPGPU(tsp, 512);
 #else
     BruteForce::solveTSP(tsp);
 #endif

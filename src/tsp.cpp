@@ -126,6 +126,8 @@ void TSP::setSolution(dist_t optimPathLength, const int *optimPathSteps, float s
     }
 
     solution->optimPathLength = optimPathLength;
+
+    solution->solutionTime = solutionTime;
 }
 
 void TSP::setSolution(const TSPSolution &tspSolution)

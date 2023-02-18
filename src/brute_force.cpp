@@ -4,6 +4,7 @@
 #include <stack>
 #include <cmath>
 #include <chrono>
+#include <cassert>
 
 void solveTSPGPUKernel(dist_t *dists)
 {
