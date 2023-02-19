@@ -9,9 +9,10 @@
 #include "brute_force.h"
 #include "tsp.h"
 
-__global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *currentPath, dist_t *optimPathLen, size_t pathSize, size_t iterationsNumber, int lastTownNumber)
+__global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *d_currentPath, dist_t *optimPathLen, size_t pathSize, size_t iterationsNumber, int lastTownNumber)
 {
     // TODO: use shared memory
+    extern __shared__ int currentPath[];
 
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int threadsNumber = blockDim.x * gridDim.x;
@@ -93,6 +94,13 @@ __global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *currentPat
 
         currentPath[idx * pathSize + lastNonLastIndex]++;
     }
+
+    for (size_t i = 0; i < pathSize; ++i)
+    {
+        d_currentPath[idx * pathSize + i] = currentPath[idx * pathSize + i];
+    }
+
+    __syncthreads();
 }
 
 namespace BruteForce
@@ -125,7 +133,7 @@ namespace BruteForce
         cudaEventCreate(&stop);
 
         cudaEventRecord(start);
-        solveTSPGPUKernel<<<1, threadsNumber>>>(d_dists, d_optimPath, d_currentPath, d_optimPathLen, pathSize, iterationsNumber, lastTownNumber);
+        solveTSPGPUKernel<<<1, threadsNumber, pathSize * threadsNumber>>>(d_dists, d_optimPath, d_currentPath, d_optimPathLen, pathSize, iterationsNumber, lastTownNumber);
 
         cudaEventRecord(stop);
         cudaEventSynchronize(stop);
@@ -133,12 +141,6 @@ namespace BruteForce
 
         dist_t *h_optimPathLen = new dist_t[threadsNumber];
         cudaMemcpy(h_optimPathLen, d_optimPathLen, threadsNumber * sizeof(dist_t), cudaMemcpyDeviceToHost);
-        // std::cout << "h_optimPathLen: " << std::endl;
-        //  for (int i = 0; i < threadsNumber; ++i)
-        //  {
-        //      std::cout << h_optimPathLen[i] << " ";
-        //  }
-        //  std::cout << std::endl;
 
         dist_t *argMinOptimPathLenIter = std::min_element(h_optimPathLen, h_optimPathLen + threadsNumber);
         size_t argMinOptimPathLen = argMinOptimPathLenIter - h_optimPathLen;
@@ -147,12 +149,6 @@ namespace BruteForce
 
         int *optimPath = new int[pathSize];
         cudaMemcpy(optimPath, d_optimPath + argMinOptimPathLen * pathSize, pathSize * sizeof(int), cudaMemcpyDeviceToHost);
-        // std::cout << "Optim path before set: " << optimPathLen << std::endl;
-        // for (int i = 0; i < pathSize; ++i)
-        // {
-        //     std::cout << optimPath[i] << " ";
-        // }
-        // std::cout << std::endl;
 
         tsp.setSolution(optimPathLen, optimPath, elapsedTime / 1000);
     }

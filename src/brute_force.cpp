@@ -6,10 +6,6 @@
 #include <chrono>
 #include <cassert>
 
-void solveTSPGPUKernel(dist_t *dists)
-{
-}
-
 namespace BruteForce
 {
     void solveTSP(TSP &tsp)
