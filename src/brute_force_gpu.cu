@@ -9,7 +9,7 @@
 #include "brute_force.h"
 #include "tsp.h"
 
-__global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *d_currentPath, dist_t *optimPathLen, size_t pathSize, size_t iterationsNumber, int lastTownNumber)
+__global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, dist_t *optimPathLen, size_t pathSize, size_t iterationsNumber, int lastTownNumber)
 {
     // TODO: use shared memory
     extern __shared__ int currentPath[];
@@ -95,11 +95,6 @@ __global__ void solveTSPGPUKernel(dist_t *dists, int *optimPath, int *d_currentP
         currentPath[idx * pathSize + lastNonLastIndex]++;
     }
 
-    for (size_t i = 0; i < pathSize; ++i)
-    {
-        d_currentPath[idx * pathSize + i] = currentPath[idx * pathSize + i];
-    }
-
     __syncthreads();
 }
 
@@ -117,11 +112,9 @@ namespace BruteForce
 
         dist_t *d_optimPathLen;
         int *d_optimPath;
-        int *d_currentPath;
         dist_t *d_dists;
         cudaMalloc((void **)&d_optimPathLen, threadsNumber * sizeof(dist_t));
         cudaMalloc((void **)&d_optimPath, threadsNumber * pathSize * sizeof(int));
-        cudaMalloc((void **)&d_currentPath, threadsNumber * pathSize * sizeof(int));
         cudaMalloc((void **)&d_dists, townsNumber * townsNumber * sizeof(int));
 
         cudaMemcpy(d_dists, tsp.getDists(), townsNumber * townsNumber * sizeof(dist_t), cudaMemcpyHostToDevice);
@@ -133,7 +126,7 @@ namespace BruteForce
         cudaEventCreate(&stop);
 
         cudaEventRecord(start);
-        solveTSPGPUKernel<<<1, threadsNumber, pathSize * threadsNumber>>>(d_dists, d_optimPath, d_currentPath, d_optimPathLen, pathSize, iterationsNumber, lastTownNumber);
+        solveTSPGPUKernel<<<1, threadsNumber, pathSize * threadsNumber * sizeof(int)>>>(d_dists, d_optimPath, d_currentPath, d_optimPathLen, pathSize, iterationsNumber, lastTownNumber);
 
         cudaEventRecord(stop);
         cudaEventSynchronize(stop);
